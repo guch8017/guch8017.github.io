@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="记一次简易的js反混淆js来源某次无意间发现了一个能将qmc转换为mp3/flac的网站，而网站本身是调用前端进行解密的，既然如此，当然趁这个机会把qmc的加/解密方式搞到手（虽然把网页离线了也是一个办法～）。果断一波F12，整个HTML文件很小，引用了两个js文件，忽略掉jQuery库，剩下的一个显然是我们想要的解密js了。 反混淆字符串解密拿到js，直接浏览器view-source看看长啥样。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简易的js反混淆">
+<meta property="og:url" content="http://guch8017.github.io/2019/05/03/jsDecomplie/index.html">
+<meta property="og:site_name" content="~guch8017~">
+<meta property="og:description" content="记一次简易的js反混淆js来源某次无意间发现了一个能将qmc转换为mp3/flac的网站，而网站本身是调用前端进行解密的，既然如此，当然趁这个机会把qmc的加/解密方式搞到手（虽然把网页离线了也是一个办法～）。果断一波F12，整个HTML文件很小，引用了两个js文件，忽略掉jQuery库，剩下的一个显然是我们想要的解密js了。 反混淆字符串解密拿到js，直接浏览器view-source看看长啥样。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/html.png">
+<meta property="og:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/code1.png">
+<meta property="og:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/encrypt.png">
+<meta property="og:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/insert.png">
+<meta property="og:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/output.png">
+<meta property="og:updated_time" content="2019-05-05T12:57:43.840Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="简易的js反混淆">
+<meta name="twitter:description" content="记一次简易的js反混淆js来源某次无意间发现了一个能将qmc转换为mp3/flac的网站，而网站本身是调用前端进行解密的，既然如此，当然趁这个机会把qmc的加/解密方式搞到手（虽然把网页离线了也是一个办法～）。果断一波F12，整个HTML文件很小，引用了两个js文件，忽略掉jQuery库，剩下的一个显然是我们想要的解密js了。 反混淆字符串解密拿到js，直接浏览器view-source看看长啥样。">
+<meta name="twitter:image" content="http://guch8017.github.io/2019/05/03/jsDecomplie/html.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://guch8017.github.io/2019/05/03/jsDecomplie/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>简易的js反混淆 | ~guch8017~</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">~guch8017~</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://guch8017.github.io/2019/05/03/jsDecomplie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Guch 8017">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="~guch8017~">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">简易的js反混淆
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-03 22:56:28" itemprop="dateCreated datePublished" datetime="2019-05-03T22:56:28+08:00">2019-05-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-05 20:57:43" itemprop="dateModified" datetime="2019-05-05T20:57:43+08:00">2019-05-05</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="记一次简易的js反混淆"><a href="#记一次简易的js反混淆" class="headerlink" title="记一次简易的js反混淆"></a>记一次简易的js反混淆</h1><h2 id="js来源"><a href="#js来源" class="headerlink" title="js来源"></a>js来源</h2><p>某次无意间发现了一个能将qmc转换为mp3/flac的网站，而网站本身是调用前端进行解密的，既然如此，当然趁这个机会把qmc的加/解密方式搞到手（虽然把网页离线了也是一个办法～）。果断一波F12，整个HTML文件很小，引用了两个js文件，忽略掉jQuery库，剩下的一个显然是我们想要的解密js了。<br><img src="/2019/05/03/jsDecomplie/html.png" alt="html"></p>
+<h2 id="反混淆"><a href="#反混淆" class="headerlink" title="反混淆"></a>反混淆</h2><h3 id="字符串解密"><a href="#字符串解密" class="headerlink" title="字符串解密"></a>字符串解密</h3><p>拿到js，直接浏览器view-source看看长啥样。一看，只有长长的一行，显然代码被软件压缩过了，不过没事，Chrome自带的开发人员工具很强大，左下角一键格式化代码，得到了稍微好看些的代码。<img src="/2019/05/03/jsDecomplie/code1.png" alt="formattedCode">代码开头首先是一个str型数组，密文看上去像Base64加密，但是解密后得到的全部是乱码，显然进行了一些其他加密处理，后面紧跟的是对Cookie的一系列操作，但是在程序运行过程中浏览器没有监测到Cookie的变化，暂且认为其未真正起到作用。而注意到前两个函数的函数调用虽然将class.function(params)型的函数调用改为了<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">class['function'](params)</span><br></pre></td></tr></table></figure></p>
+<p>进行调用，但仍然能明显看出到底调用了什么函数，但是从<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _0x5d98 = <span class="function"><span class="keyword">function</span>(<span class="params">_0x55979a, _0x1aa978</span>)</span></span><br></pre></td></tr></table></figure></p>
+<p>后，所有函数调用及大部分字符串都变成了对 _0x5d98 的调用<img src="/2019/05/03/jsDecomplie/encrypt.png" alt="0x5d98">此时可基本确定 _0x5d98 函数用于对加密的字符串进行解密。并且可以确定传入参数大致为</p>
+<ul>
+<li>param1[Int]: 对应的加密字符串</li>
+<li>param2[String]:解密密钥（疑似Rc4）<br>而解密函数涉及到较多的循环等操作，本着不做无意义工作的精神，决定直接使用console调用解密函数并打印返回值。首先用Python提取所有所有对解密函数的调用。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"/Users/~/js_decomplie/qmc.1.js"</span>,<span class="string">"r"</span>) <span class="keyword">as</span> finp, \</span><br><span class="line">     open(<span class="string">"/Users/~/js_decomplie/replaceOrigin.txt"</span>,<span class="string">"w"</span>) <span class="keyword">as</span> out, \</span><br><span class="line">     open(<span class="string">"/Users/~/js_decomplie/insertLog.js"</span>,<span class="string">"w"</span>) <span class="keyword">as</span> out2:  <span class="comment">#用于Console打印调试信息</span></span><br><span class="line">    s = finp.readline()</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> re.findall(<span class="string">"_0x5d98\('(.+?)'\)"</span>, s):</span><br><span class="line">        out.write(<span class="string">"_0x5d98('&#123;&#125;')\n"</span>.format(t))</span><br><span class="line">        out2.write(<span class="string">"console.log(0x5d98('&#123;&#125;'));"</span>.format(t))</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>首先想到的是直接在代码尾部添加console.log()函数进行打印，但是实际操作后发现控制台未输出任何调试信息，而在Chrome的Developer Tools的console中直接调用该函数显示正常，后决定将代码插入位置改为第一次调用解密函数前。<br><img src="/2019/05/03/jsDecomplie/insert.png" alt="insert"><br><img src="/2019/05/03/jsDecomplie/output.png" alt="output"><br>控制台输出正确调试信息。到此字符串加密已经解决，利用Python对被加密字符串进行替换。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"></span><br><span class="line">in1 = open(<span class="string">"/Users/~/js_decomplie/qmc.1.js"</span>,<span class="string">"r"</span>)  <span class="comment">#原js</span></span><br><span class="line">in2 = open(<span class="string">"/Users/~/js_decomplie/replaceOrigin.txt"</span>,<span class="string">"r"</span>)  <span class="comment">#替换用 原数据</span></span><br><span class="line">in3 = open(<span class="string">"/Users/~/js_decomplie/replaceData.txt"</span>,<span class="string">"r"</span>)  <span class="comment">#替换目标数据</span></span><br><span class="line">out = open(<span class="string">"/Users/~/js_decomplie/decorderReplaced.js"</span>,<span class="string">"w"</span>)  <span class="comment">#输出</span></span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> in1.readlines():</span><br><span class="line">    rpori = in2.readlines()</span><br><span class="line">    rpdst = in3.readlines()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(rpori)):</span><br><span class="line">        print(rpori[i].strip()+<span class="string">" -&gt; "</span>+rpdst[i].strip())</span><br><span class="line">        line = line.replace(rpori[i].strip(),<span class="string">"'"</span>+rpdst[i].strip()+<span class="string">"'"</span>)</span><br><span class="line">    out.write(line)</span><br></pre></td></tr></table></figure></p>
+<p>替换完成后导入WebStorm进行预览，发现js执行错误，正则表达式出现问题，后发现出错原因为当正则中当‘\’以加密存储时记录为一个字符，而还原时应替换为转义字符’\\‘，替换后，函数正确执行，字符串解密与替换完成。</p>
+<h3 id="寻找真实函数"><a href="#寻找真实函数" class="headerlink" title="寻找真实函数"></a>寻找真实函数</h3><p>一般的js混淆都喜欢向js中插入无意义代码以达到一部分混淆的作用。现在的目标就是找到对文件解密有意义对代码。<br>首先，在阅读代码过程中，容易注意到有部分重复出现的代码，如以下代码块:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _0x450c85 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _0x59a74b = !![];</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">_0x4b341d, _0x544d6f</span>) </span>&#123;</span><br><span class="line">		<span class="keyword">var</span> _0x31d6c4 = _0x59a74b ? <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        	<span class="keyword">if</span> (_0x544d6f) &#123;</span><br><span class="line">            	<span class="keyword">var</span> _0x385eb3 = _0x544d6f[<span class="string">'apply'</span>](_0x4b341d, <span class="built_in">arguments</span>);</span><br><span class="line">                _0x544d6f = <span class="literal">null</span>;</span><br><span class="line">                <span class="keyword">return</span> _0x385eb3;</span><br><span class="line">       	&#125;</span><br><span class="line">   	&#125;: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">       _0x59a74b = ![];</span><br><span class="line">       <span class="keyword">return</span> _0x31d6c4;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure></p>
+<p>通常在编程过程中不会出现仅变量名有所差别的函数（造成浪费），故猜测该代码块为混淆代码，经分析后发现该代码块的作用是使函数继承其本身，没有任何意义。<br>同样的，类似于以下代码:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!_0x52b7a4()) &#123;</span><br><span class="line">	<span class="keyword">if</span> (!_0x14577b()) &#123;</span><br><span class="line">		_0x5eae0a(<span class="string">'\x69\x6e\x64\u0435\x78\x4f\x66'</span>);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		_0x5eae0a(<span class="string">'\x69\x6e\x64\x65\x78\x4f\x66'</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	_0x5eae0a(<span class="string">'\x69\x6e\x64\u0435\x78\x4f\x66'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>看似一个判断语句，实则无论条件如何都会执行同一无意义操作 _0x5eae0a.indexOf 。<br>在大量混淆代码存在的情况下，从入口找出解密函数更为方便，注意到HTML元素中有打开文件的部分，在js中定位到接收文件路径的方法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">'#openfile'</span>)[<span class="string">'bind'</span>](<span class="string">'change'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _0x4b40ea = <span class="keyword">this</span>[<span class="string">'files'</span>];</span><br><span class="line">	<span class="keyword">if</span> (_0x4b40ea[<span class="string">'length'</span>] &gt; <span class="number">0x0</span>) &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">var</span> _0x1167bf = <span class="number">0x0</span>; _0x1167bf &lt; _0x4b40ea[<span class="string">'length'</span>]; _0x1167bf++) &#123;</span><br><span class="line">			<span class="built_in">console</span>[<span class="string">'log'</span>](_0x4b40ea[_0x1167bf]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">var</span> _0x1167bf <span class="keyword">in</span> _0x4b40ea) &#123;</span><br><span class="line">			$(<span class="string">'#log'</span>)[<span class="string">'append'</span>](<span class="string">'第'</span> + _0x1efec9 + <span class="string">'个文件名:'</span> + _0x4b40ea[_0x1167bf][<span class="string">'name'</span>] + <span class="string">'\x0d\x0a'</span>); <span class="comment">//此处控制网页上的log窗口输出</span></span><br><span class="line">			_0x2ada50[_0x1efec9] = _0x4b40ea[_0x1167bf][<span class="string">'name'</span>][<span class="string">'toLowerCase'</span>]()[<span class="string">'replace'</span>](<span class="string">'qmcflac'</span>, <span class="string">'flac'</span>)[<span class="string">'replace'</span>](<span class="string">'qmc3'</span>, <span class="string">'mp3'</span>)[<span class="string">'replace'</span>](<span class="string">'qmc0'</span>, <span class="string">'mp3'</span>);</span><br><span class="line">			_0x481c3b(<span class="keyword">new</span> Blob([_0x4b40ea[_0x1167bf]]), _0x1efec9); <span class="comment">//此处将文件句柄传向下一个函数_0x481c3b()</span></span><br><span class="line">			_0x1efec9++; <span class="comment">//文件计数器</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对文件句柄传递函数追踪，可发现对文件进行读取的方法。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">startTime = <span class="keyword">new</span> <span class="built_in">Date</span>()[<span class="string">'valueOf'</span>]();</span><br><span class="line">$(<span class="string">'#log'</span>)[<span class="string">'append'</span>](<span class="string">'第'</span> + _0xb85669 + <span class="string">'个文件开始时间:'</span> + startTime + <span class="string">'\x0d\x0a'</span>);</span><br><span class="line"><span class="keyword">var</span> _0x4e592f = <span class="keyword">new</span> FileReader(); <span class="comment">//创建一个文件读取方法</span></span><br><span class="line">_0x4e592f[<span class="string">'readAsBinaryString'</span>](_0x58ca49); <span class="comment">//二进制方式打开</span></span><br><span class="line">_0x4e592f[<span class="string">'onload'</span>] = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	bstr = _0x47dc75(<span class="keyword">this</span>[<span class="string">'result'</span>], <span class="keyword">this</span>[<span class="string">'result'</span>][<span class="string">'length'</span>]); <span class="comment">//解密关键方法</span></span><br><span class="line">	<span class="keyword">var</span> _0x239485 = <span class="keyword">new</span> Blob([bstr]);</span><br><span class="line">	<span class="keyword">var</span> _0x5aa6ad = <span class="built_in">document</span>[<span class="string">'createElement'</span>](<span class="string">'a'</span>); <span class="comment">//此处对页面添加下载链接元素，说明到此处为止解密工作已经处理完成</span></span><br><span class="line">	_0x5aa6ad[<span class="string">'href'</span>] = <span class="built_in">window</span>[<span class="string">'URL'</span>][<span class="string">'createObjectURL'</span>](_0x239485);</span><br><span class="line">	_0x5aa6ad[<span class="string">'innerHTML'</span>] = _0x2ada50[_0xb85669];</span><br><span class="line">	_0x5aa6ad[<span class="string">'download'</span>] = _0x2ada50[_0xb85669];</span><br><span class="line">	$(<span class="string">'body'</span>)[<span class="string">'append'</span>](_0x5aa6ad);</span><br><span class="line">	endTime = <span class="keyword">new</span> <span class="built_in">Date</span>()[<span class="string">'valueOf'</span>]();</span><br><span class="line">	$(<span class="string">'#log'</span>)[<span class="string">'append'</span>](<span class="string">'第'</span> + _0xb85669 + <span class="string">'个文件结束时间:'</span> + endTime + <span class="string">'\x0d\x0a'</span>);</span><br><span class="line">	$(<span class="string">'#log'</span>)[<span class="string">'append'</span>](<span class="string">'第'</span> + _0xb85669 + <span class="string">'个文件耗时:'</span> + (endTime - startTime) + <span class="string">'毫秒\x0d\x0a'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>显然，_0x47dc75()为解密函数，传入参数分别为密文字符串以及密文长度，返回解密后的字符串。继续跟踪，最终可以找到解密的原始函数：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">_0x47dc75</span>(<span class="params">_0x4ccae9, _0x1bfb3f</span>) </span>&#123;</span><br><span class="line">	u8arr = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(_0x1bfb3f);</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">var</span> _0x10cce6 = <span class="number">0x0</span>; _0x10cce6 &lt; _0x1bfb3f; _0x10cce6++) &#123;</span><br><span class="line">		u8arr[_0x10cce6] = _0x4ccae9[_0x10cce6][<span class="string">'charCodeAt'</span>](<span class="number">0x0</span>) ^ _0x237866(_0x10cce6);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> u8arr;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">_0x237866</span>(<span class="params">_0x1b18d2</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (_0x1b18d2 &gt;= <span class="number">0x8000</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> _0x546fd5(_0x1b18d2 % <span class="number">0x7fff</span>);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> _0x546fd5(_0x1b18d2);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">_0x546fd5</span>(<span class="params">_0x23698e</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _0x326eb2 = [<span class="number">0x77</span>, <span class="number">0x48</span>, <span class="number">0x32</span>, <span class="number">0x73</span>, <span class="number">0xde</span>, <span class="string">'...'</span>];<span class="comment">//KeyBox过长故省略部分</span></span><br><span class="line">	<span class="keyword">return</span> _0x326eb2[(_0x23698e * _0x23698e + <span class="number">0x13c1b</span>) % <span class="number">0x100</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到此，本次js反混淆工作已经完成。最后将其重写为C语言实现<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  main.c</span></span><br><span class="line"><span class="comment">//  qmcDecrypt</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Created by guch8017 on 2019/4/28.</span></span><br><span class="line"><span class="comment">//  Copyright © 2019 guch8017. All rights reserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="keyword">uint8_t</span> keyBox[] = &#123;<span class="number">0x77</span>, <span class="number">0x48</span>, <span class="number">0x32</span>, <span class="number">0x73</span>, <span class="number">0xde</span>,...&#125;; <span class="comment">//KeyBox过长略去部分</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">uint8_t</span> keyGen(<span class="keyword">int</span> i)&#123;</span><br><span class="line">    <span class="keyword">return</span> keyBox[(i * i + <span class="number">0x13c1b</span>) % <span class="number">0x100</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint8_t</span> xorKey(<span class="keyword">int</span> i)&#123;</span><br><span class="line">    <span class="keyword">if</span>(i &gt;= <span class="number">0x8000</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> keyGen(i % <span class="number">0x7fff</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> keyGen(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    FILE * inFp, * outFp;</span><br><span class="line">    <span class="keyword">uint8_t</span> buff;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(argc&lt;=<span class="number">1</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Error: No input file\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">char</span> targetName[<span class="built_in">strlen</span>(argv[<span class="number">1</span>]) + <span class="number">10</span>];</span><br><span class="line">    <span class="built_in">strcpy</span>(targetName, argv[<span class="number">1</span>]);</span><br><span class="line">    <span class="built_in">strcat</span>(targetName, <span class="string">".out"</span>);</span><br><span class="line">    <span class="keyword">if</span> ((inFp = fopen(argv[<span class="number">1</span>], <span class="string">"rb"</span>))==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Error: Can't not open file %s\n"</span>,argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ((outFp = fopen(targetName, <span class="string">"wb"</span>))==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Error: Can't not create file %s\n"</span>,argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span>(!feof(inFp))&#123;</span><br><span class="line">        fread(&amp;buff, <span class="keyword">sizeof</span>(buff), <span class="number">1</span>, inFp);</span><br><span class="line">        buff ^= xorKey(i++);</span><br><span class="line">        fwrite(&amp;buff, <span class="keyword">sizeof</span>(buff), <span class="number">1</span>, outFp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Target: %s\n"</span>,targetName);</span><br><span class="line">    fclose(inFp);</span><br><span class="line">    fclose(outFp);</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><h3 id="简易的JS混淆方法"><a href="#简易的JS混淆方法" class="headerlink" title="简易的JS混淆方法"></a>简易的JS混淆方法</h3><p>显然，这个js加密是较为简易的，强度也并不高，运用了目前常用的几种混淆方法：</p>
+<ul>
+<li>变量名混淆</li>
+<li>插入无意义代码</li>
+<li>将立即数改写为复杂表达式或函数的返回值</li>
+<li>对字符串加密，调用时再调用函数对其解密</li>
+</ul>
+<p>然而，js本身的性质决定了即使对字符串加密，解密函数仍然要在js代码中实现，这让攻击者可以轻易的调用解密函数对加密进行解密（解密函数都写给别人了还有啥用呢）。目前见到的针对解释性语言的加密，最强的还是PHP中虚拟机加密，但js执行效率不足等等原因限制了该领域的发展，目前暂时没有见到有相关的服务出现。</p>
+<h3 id="为何无法在js结尾处打印调试信息"><a href="#为何无法在js结尾处打印调试信息" class="headerlink" title="为何无法在js结尾处打印调试信息"></a>为何无法在js结尾处打印调试信息</h3><p>反编译后，可以发现主函数中有一段<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _0x2c575f = _0x450c85(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _0x1995da = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">	<span class="keyword">var</span> _0xb58eb6 = <span class="keyword">typeof</span> <span class="built_in">window</span> !== <span class="string">'undefined'</span> ? <span class="built_in">window</span> : <span class="keyword">typeof</span> process === <span class="string">'object'</span> &amp;&amp; <span class="keyword">typeof</span> <span class="built_in">require</span> === <span class="string">'function'</span> &amp;&amp; <span class="keyword">typeof</span> global === <span class="string">'object'</span> ? global : <span class="keyword">this</span>;</span><br><span class="line">	<span class="keyword">if</span> (!_0xb58eb6[<span class="string">'console'</span>]) &#123;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>] = <span class="function"><span class="keyword">function</span>(<span class="params">_0x5140de</span>) </span>&#123;</span><br><span class="line">			<span class="keyword">var</span> _0x47f6d1 = &#123;&#125;;</span><br><span class="line">			_0x47f6d1[<span class="string">'log'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'warn'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'debug'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'info'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'error'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'exception'</span>] = _0x5140de;</span><br><span class="line">			_0x47f6d1[<span class="string">'trace'</span>] = _0x5140de;</span><br><span class="line">			<span class="keyword">return</span> _0x47f6d1;</span><br><span class="line">		&#125;(_0x1995da);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'log'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'warn'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'debug'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'info'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'error'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'exception'</span>] = _0x1995da;</span><br><span class="line">		_0xb58eb6[<span class="string">'console'</span>][<span class="string">'trace'</span>] = _0x1995da;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里可以看到函数获取了窗口的句柄，并将其中的调试相关函数全部替换为 _0x1995da ，即一个空函数，故在主程序加载完成后 console.log 已经变为了一个空函数，无法打印调试信息。</p>
+<p>mermaid<br>graph LR<br>    A[A] –&gt; B[B]<br>    A1[A] — B1[B]<br>    A4[A] -.- B4[B]<br>    A5[A] -.-&gt; B5[B]<br>    A7[A] ==&gt; B7[B]<br>    A2[A] – 描述 — B2[B]<br>    A3[A] – 描述 –&gt; B3[B]<br>    A6[A] -. 描述 .-&gt; B6[B]<br>    A8[A] == 描述 ==&gt; B8[B]<br><code>`</code></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Guch 8017</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/guch8017" title="GitHub &rarr; https://github.com/guch8017" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:guch8017@gmail.com" title="E-Mail &rarr; mailto:guch8017@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#记一次简易的js反混淆"><span class="nav-number">1.</span> <span class="nav-text">记一次简易的js反混淆</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#js来源"><span class="nav-number">1.1.</span> <span class="nav-text">js来源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反混淆"><span class="nav-number">1.2.</span> <span class="nav-text">反混淆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串解密"><span class="nav-number">1.2.1.</span> <span class="nav-text">字符串解密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找真实函数"><span class="nav-number">1.2.2.</span> <span class="nav-text">寻找真实函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">1.3.</span> <span class="nav-text">小结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简易的JS混淆方法"><span class="nav-number">1.3.1.</span> <span class="nav-text">简易的JS混淆方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为何无法在js结尾处打印调试信息"><span class="nav-number">1.3.2.</span> <span class="nav-text">为何无法在js结尾处打印调试信息</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Guch 8017</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.1"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.1"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
